@@ -3,7 +3,6 @@
 import sys, os
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import OrdinalEncoder
 import dill
 import json
 import re
@@ -26,12 +25,11 @@ df = pd.read_table(
     names=columns
 )
 
-y_pred = pipeline.predict(df)
-
+indices_pred, y_pred = pipeline.predict(df)
 answer = enc.inverse_transform(y_pred)
-
-df['gender'] = answer[:,0]
-df['age'] = answer[:,1]
+for index, (answer_gender, answer_age) in zip(indices_pred, answer):
+    df.iloc[index, df.columns.get_loc('gender')] = answer_gender
+    df.iloc[index, df.columns.get_loc('age')] = answer_age
 
 output = df[['uid', 'gender', 'age']]
 output.sort_values(by='uid',axis = 0, ascending = True, inplace = True)
